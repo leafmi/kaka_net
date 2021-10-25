@@ -25,8 +25,9 @@ class TestRequest extends KaKaBaseRequest<List<TestModel>> {
     return value;
   }
 }
-
+```
 · 调用发送请求
+
 ```
   _test() async{
     var request = TestRequest();
