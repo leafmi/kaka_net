@@ -37,8 +37,4 @@ class TestRequest extends KaKaBaseRequest<List<TestModel>> {
       print("KaKaNet:${result.error?.message}-${result.error?.data}");
     }
   }
-```dar
-
-
-
 ```
