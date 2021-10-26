@@ -36,6 +36,7 @@ class TestRequest extends KaKaBaseRequest<List<TestModel>> {
     return BaseResponse.fromJson(data);
   }
 
+  ///是否开启BaseResponse解析，不开启则是将获取请求的数据直接进行parseData解析
   @override
   bool enableParseBaseData() {
     return true;
