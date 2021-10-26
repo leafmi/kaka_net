@@ -16,6 +16,7 @@ class TestRequest extends KaKaBaseRequest<List<TestModel>> {
     return "/wxarticle/chapters/json";
   }
   
+  ///最终结果数据解析规则
   @override
   List<TestModel>? parseData(data) {
     if (data == null) {
@@ -45,7 +46,7 @@ class TestRequest extends KaKaBaseRequest<List<TestModel>> {
 ```dart
   _test() async{
     var request = TestRequest();
-    //请求结果及所得不包含其他干扰数据
+    ///请求结果及所得不包含其他干扰数据
     var result = await KaKaNet.getInstance().fire<List<TestModel>>(request);
     if(result.status == KaKaResponseStatus.COMPLETED) {
       print(result.data.toString());
