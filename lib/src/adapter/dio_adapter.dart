@@ -111,7 +111,8 @@ class DioAdapter extends KaKaNetAdapter {
         return KaKaNetError(KaKaErrorCode.OTHER_ERROR, error.message,
             data: KaKaErrorData(
                 code: error.response?.statusCode,
-                message: error.response?.statusMessage));
+                error: error.error,
+                message: error.error.toString()));
     }
   }
 
