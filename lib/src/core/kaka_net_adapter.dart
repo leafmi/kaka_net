@@ -10,5 +10,5 @@ abstract class KaKaNetAdapter {
 
   KaKaNetAdapter(this.baseUrl);
 
-  Future<KaKaNetResponse<dynamic>> send(KaKaBaseRequest request);
+  Future<dynamic> send(KaKaBaseRequest request);
 }

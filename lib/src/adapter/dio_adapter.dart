@@ -1,12 +1,7 @@
-import 'dart:convert';
-
-import 'package:dio/dio.dart';
-import 'package:kaka_net/src/core/kaka_net_response.dart';
+import 'package:kaka_net/kaka_net.dart';
 import 'package:kaka_net/src/interceptor/logging_interceptor.dart';
-import 'package:kaka_net/src/request/kaka_base_request.dart';
 
 import '../core/kaka_net_adapter.dart';
-import '../core/kaka_net_error.dart';
 
 ///Dio适配器
 class DioAdapter extends KaKaNetAdapter {
@@ -14,7 +9,9 @@ class DioAdapter extends KaKaNetAdapter {
 
   DioAdapter(String baseUrl, List<Interceptor>? interceptors) : super(baseUrl) {
     var options = BaseOptions(
-        baseUrl: baseUrl, connectTimeout: 10000, receiveTimeout: 10000);
+        baseUrl: baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10));
     _dio = Dio(options);
     //日志拦截器
     _dio.interceptors.add(LoggingInterceptor());
@@ -25,7 +22,7 @@ class DioAdapter extends KaKaNetAdapter {
   }
 
   @override
-  Future<KaKaNetResponse<dynamic>> send(KaKaBaseRequest request) async {
+  Future<dynamic> send(KaKaBaseRequest request) async {
     try {
       var response;
       //这儿其实可以用dio.request来实现传入对应的method
@@ -45,12 +42,10 @@ class DioAdapter extends KaKaNetAdapter {
       }
       //只需返回KaKaNetResponse<T>，Dart会自动将返回值包装成Future对象
       return handleResponse(response, request);
-    } on DioError catch (e) {
-      return KaKaNetResponse.error(
-          error: handleOtherDioError(e), request: request);
+    } on DioException catch (e) {
+      throw handleOtherDioError(e);
     } catch (e) {
-      return KaKaNetResponse.error(
-          error: handleOtherError(e), request: request);
+      throw handleOtherError(e);
     }
   }
 
@@ -87,33 +82,27 @@ class DioAdapter extends KaKaNetAdapter {
     return _dio.delete(request.url(), queryParameters: request.params);
   }
 
-  KaKaNetResponse handleResponse(Response response, KaKaBaseRequest request) {
+  dynamic handleResponse(Response response, KaKaBaseRequest request) {
     if (response.statusCode == 200) {
       //成功
-      if (response.data is String) {
-        var json = jsonDecode(response.data);
-        return KaKaNetResponse.completed(data: json, request: request);
-      }
-      return KaKaNetResponse.completed(data: response.data, request: request);
+      return response.data;
     } else {
       //失败
-      return KaKaNetResponse.error(
-          error: KaKaNetError(response.statusCode, response.statusMessage),
-          request: request);
+      throw KaKaNetError(response.statusCode, response.statusMessage);
     }
   }
 
   ///处理Dio错误
-  KaKaNetError handleOtherDioError(DioError error) {
+  KaKaNetError handleOtherDioError(DioException error) {
     switch (error.type) {
-      case DioErrorType.response:
+      case DioExceptionType.badResponse:
         return KaKaNetError(KaKaErrorCode.HTTP_ERROR, error.message,
             data: KaKaErrorData(
                 code: error.response?.statusCode,
                 message: error.response?.statusMessage));
-      case DioErrorType.connectTimeout:
-      case DioErrorType.receiveTimeout:
-      case DioErrorType.sendTimeout:
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.receiveTimeout:
+      case DioExceptionType.sendTimeout:
         return KaKaNetError(KaKaErrorCode.TIMEOUT_ERROR, error.message,
             data: KaKaErrorData(
                 code: error.response?.statusCode,

@@ -81,11 +81,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _testRequest() async {
     var request = TestRequest();
-    var result = await KaKaNet.getInstance().fire<List<TestModel>>(request);
-    if (result.status == KaKaResponseStatus.COMPLETED) {
-      print(result.data.toString());
-    } else {
-      print("KaKaNet:${result.error?.message}-${result.error?.data}");
+    var result = await KaKaNet.instance.fire<List<TestModel>>(request);
+    switch (result) {
+      case Success():
+        print(result.data.toString());
+        break;
+      case Error():
+        result.error;
+        print("KaKaNet:${result.error}");
+        break;
     }
   }
 }
