@@ -44,14 +44,17 @@ class TestRequest extends KaKaBaseRequest<List<TestModel>> {
 · 调用发送请求
 
 ```dart
-  _test() async{
-    var request = TestRequest();
-    ///请求结果及所得不包含其他干扰数据
-    var result = await KaKaNet.getInstance().fire<List<TestModel>>(request);
-    if(result.status == KaKaResponseStatus.COMPLETED) {
+  _testRequest() async {
+  var request = TestRequest();
+  var result = await KaKaNet.instance.fire<List<TestModel>>(request);
+  switch (result) {
+    case Success():
       print(result.data.toString());
-    }else {
-      print("KaKaNet:${result.error?.message}-${result.error?.data}");
-    }
+      break;
+    case Error():
+      result.error;
+      print("KaKaNet:${result.error}");
+      break;
   }
+}
 ```
